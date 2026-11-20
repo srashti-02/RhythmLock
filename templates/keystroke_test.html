@@ -1,0 +1,243 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Complete your Rhythmlock typing enrollment and build your personal keystroke dynamics profile."
+    >
+
+    <title>Typing Enrollment | Rhythmlock</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <a href="{{ url_for('home') }}">
+            Rhythmlock
+        </a>
+
+        <button
+            type="button"
+            id="logoutButton"
+        >
+            Logout
+        </button>
+    </nav>
+
+
+    <!-- Main Enrollment Section -->
+    <main>
+
+        <h1>Typing Enrollment</h1>
+
+        <p>
+            Let's learn your unique typing rhythm.
+        </p>
+
+
+        <!-- Target Phrase -->
+        <section>
+
+            <h2>Target Phrase</h2>
+
+            <p id="targetPhrase">
+                my secure login
+            </p>
+
+            <p>
+                Type the above phrase naturally.
+                Avoid rushing or deliberately changing your typing speed.
+            </p>
+
+        </section>
+
+
+        <!-- Sample Progress -->
+        <section>
+
+            <h2>Enrollment Progress</h2>
+
+            <h3 id="sampleProgress">
+                Sample 1 / 7
+            </h3>
+
+            <p id="sampleStatus" aria-live="polite">
+                No sample completed yet.
+            </p>
+
+            <p>
+                Characters typed:
+                <strong id="progress">0 / 15</strong>
+            </p>
+
+        </section>
+
+
+        <!-- Typing Area -->
+        <section>
+
+            <h2>Typing Area</h2>
+
+            <input
+                type="text"
+                id="typingInput"
+                placeholder="Click Start Sample to begin"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                disabled
+                aria-label="Typing enrollment input"
+            >
+
+            <br><br>
+
+            <button
+                type="button"
+                id="startButton"
+                disabled
+            >
+                Loading Enrollment...
+            </button>
+
+            <p
+                id="status"
+                role="status"
+                aria-live="polite"
+            >
+                Loading your enrollment progress...
+            </p>
+
+        </section>
+
+
+        <!-- Live Keystroke Information -->
+        <section>
+
+            <h2>Live Typing Information</h2>
+
+            <p>
+                Last Key:
+                <strong id="lastKey">-</strong>
+            </p>
+
+            <p>
+                Dwell Time:
+                <strong id="dwellTime">-</strong>
+            </p>
+
+            <p>
+                Flight Time:
+                <strong id="flightTime">-</strong>
+            </p>
+
+        </section>
+
+
+        <!-- Keystroke Data Table -->
+        <section>
+
+            <h2>Keystroke Data</h2>
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Sequence</th>
+                        <th>Key</th>
+                        <th>Dwell Time (ms)</th>
+                        <th>Flight Time (ms)</th>
+                    </tr>
+                </thead>
+
+                <tbody id="keystrokeTableBody">
+                </tbody>
+
+            </table>
+
+        </section>
+
+
+        <!-- Enrollment Completion Message -->
+        <section
+            id="enrollmentComplete"
+            style="display: none;"
+        >
+
+            <h2>Enrollment Completed!</h2>
+
+            <p>
+                Your personal typing profile has been created successfully.
+            </p>
+
+            <p>
+                Redirecting to your dashboard...
+            </p>
+
+        </section>
+
+    </main>
+
+
+    <!-- Logout Functionality -->
+    <script>
+
+        const logoutButton =
+            document.getElementById("logoutButton");
+
+        logoutButton.addEventListener("click", async function () {
+
+            logoutButton.disabled = true;
+            logoutButton.textContent = "Logging out...";
+
+            try {
+
+                const response = await fetch("/logout", {
+                    method: "POST"
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+
+                    throw new Error(
+                        result.message || "Logout failed."
+                    );
+
+                }
+
+                window.location.href = "/";
+
+            } catch (error) {
+
+                console.error("Logout error:", error);
+
+                logoutButton.disabled = false;
+                logoutButton.textContent = "Logout";
+
+                alert("Unable to logout. Please try again.");
+
+            }
+
+        });
+
+    </script>
+
+
+    <!-- Enrollment JavaScript -->
+    <script
+        src="{{ url_for('static', filename='js/script.js') }}"
+    ></script>
+
+</body>
+</html>

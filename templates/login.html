@@ -1,0 +1,785 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Rhythmlock</title>
+
+    <meta
+        name="description"
+        content="Securely log in to Rhythmlock using password and typing-pattern verification."
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <style>
+        .auth-wrapper {
+            width: 100%;
+            max-width: 440px;
+            margin: 55px auto;
+            padding: 30px;
+            background: var(--surface, #141414);
+            border: 1px solid var(--border, #303030);
+            border-radius: 14px;
+        }
+
+        .auth-wrapper h1 {
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary, #aaa);
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 17px;
+        }
+
+        .auth-form label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .auth-form input,
+        .verification-input {
+            width: 100%;
+            padding: 13px;
+            background: #080808;
+            color: #fff;
+            border: 1px solid #383838;
+            border-radius: 8px;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .auth-form input:focus,
+        .verification-input:focus {
+            border-color: #aaa;
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 13px;
+            border: none;
+            border-radius: 8px;
+            background: #fff;
+            color: #000;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .auth-button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .auth-message {
+            min-height: 22px;
+            margin-top: 14px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .auth-message.error {
+            color: #ff6b6b;
+        }
+
+        .auth-message.success {
+            color: #55d98b;
+        }
+
+        .auth-footer {
+            margin-top: 22px;
+            text-align: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: #fff;
+        }
+
+        #verificationSection {
+            display: none;
+        }
+
+        .verification-phrase {
+            margin: 18px 0;
+            padding: 16px;
+            text-align: center;
+            background: #080808;
+            border: 1px dashed #555;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .verification-info {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        .verification-input {
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .verification-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .verification-actions button {
+            flex: 1;
+        }
+
+        .secondary-button {
+            padding: 12px;
+            background: #202020;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .verification-score {
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 500px) {
+            .auth-wrapper {
+                margin: 25px auto;
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="logo">
+                Rhythmlock
+            </a>
+        </div>
+    </nav>
+
+
+    <main class="auth-wrapper">
+
+        <!-- PASSWORD LOGIN -->
+        <section id="loginSection">
+
+            <h1>Welcome Back</h1>
+
+            <p class="auth-subtitle">
+                Log in to your Rhythmlock account.
+                Your typing pattern adds another layer of security.
+            </p>
+
+            <form id="loginForm" class="auth-form">
+
+                <div>
+                    <label for="identifier">
+                        Username or Email
+                    </label>
+
+                    <input
+                        type="text"
+                        id="identifier"
+                        name="identifier"
+                        placeholder="Enter username or email"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+
+                <div>
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+
+                <button
+                    type="submit"
+                    id="loginButton"
+                    class="auth-button"
+                >
+                    Login
+                </button>
+
+            </form>
+
+            <p
+                id="loginStatus"
+                class="auth-message"
+                role="status"
+                aria-live="polite"
+            ></p>
+
+            <div class="auth-footer">
+                Don't have an account?
+                <a href="{{ url_for('register_page') }}">
+                    Register
+                </a>
+            </div>
+
+        </section>
+
+
+        <!-- BEHAVIORAL VERIFICATION -->
+        <section id="verificationSection">
+
+            <h1>Typing Verification</h1>
+
+            <p class="auth-subtitle">
+                Your password is verified.
+                Now type the phrase below using your natural typing rhythm.
+            </p>
+
+            <p class="verification-info">
+                Type the exact phrase shown below. Your keystroke
+                timing will be compared with your saved typing profile.
+            </p>
+
+            <div
+                class="verification-phrase"
+                id="verificationPhrase"
+            >
+                my secure login
+            </div>
+
+            <label for="typingVerificationInput">
+                Type the phrase
+            </label>
+
+            <input
+                type="text"
+                id="typingVerificationInput"
+                class="verification-input"
+                placeholder="Click Start Typing first"
+                autocomplete="off"
+                autocapitalize="off"
+                spellcheck="false"
+                disabled
+            >
+
+            <div class="verification-actions">
+
+                <button
+                    type="button"
+                    id="startTypingButton"
+                    class="auth-button"
+                >
+                    Start Typing
+                </button>
+
+                <button
+                    type="button"
+                    id="resetTypingButton"
+                    class="secondary-button"
+                >
+                    Reset
+                </button>
+
+            </div>
+
+            <p
+                id="typingStatus"
+                class="auth-message"
+                role="status"
+                aria-live="polite"
+            >
+                Click Start Typing to begin.
+            </p>
+
+            <p
+                id="verificationScore"
+                class="verification-score"
+            ></p>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        // =====================================================
+        // ELEMENTS
+        // =====================================================
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const identifierInput =
+            document.getElementById("identifier");
+
+        const passwordInput =
+            document.getElementById("password");
+
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const loginStatus =
+            document.getElementById("loginStatus");
+
+        const loginSection =
+            document.getElementById("loginSection");
+
+        const verificationSection =
+            document.getElementById("verificationSection");
+
+        const verificationPhrase =
+            document.getElementById("verificationPhrase");
+
+        const typingInput =
+            document.getElementById("typingVerificationInput");
+
+        const startTypingButton =
+            document.getElementById("startTypingButton");
+
+        const resetTypingButton =
+            document.getElementById("resetTypingButton");
+
+        const typingStatus =
+            document.getElementById("typingStatus");
+
+        const verificationScore =
+            document.getElementById("verificationScore");
+
+
+        // =====================================================
+        // VERIFICATION SETTINGS
+        // =====================================================
+
+        const PHRASE = verificationPhrase.textContent.trim();
+
+        let verificationActive = false;
+        let verificationInProgress = false;
+
+        let currentIndex = 0;
+
+        let keystrokes = [];
+
+        let keyPressTimes = new Map();
+
+        let previousReleaseTime = null;
+
+
+        // =====================================================
+        // DISPLAY MESSAGE
+        // =====================================================
+
+        function showMessage(element, message, type = "") {
+
+            element.textContent = message;
+            element.className = "auth-message";
+
+            if (type) {
+                element.classList.add(type);
+            }
+        }
+
+
+        // =====================================================
+        // PASSWORD LOGIN
+        // =====================================================
+
+        loginForm.addEventListener("submit", async function (event) {
+
+            event.preventDefault();
+
+            if (verificationInProgress) {
+                return;
+            }
+
+            const identifier = identifierInput.value.trim();
+            const password = passwordInput.value;
+
+            loginButton.disabled = true;
+            loginButton.textContent = "Checking...";
+
+            showMessage(loginStatus, "Verifying your credentials...");
+
+            try {
+
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        identifier: identifier,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+
+                    showMessage(
+                        loginStatus,
+                        result.message || "Login failed.",
+                        "error"
+                    );
+
+                    return;
+                }
+
+                // New users must complete enrollment.
+                if (!result.verification_required) {
+
+                    window.location.href = result.next_url;
+                    return;
+                }
+
+                // Existing users must complete typing verification.
+                verificationInProgress = true;
+
+                loginSection.style.display = "none";
+                verificationSection.style.display = "block";
+
+                showMessage(
+                    typingStatus,
+                    "Password verified. Complete typing verification.",
+                    "success"
+                );
+
+            } catch (error) {
+
+                console.error("Login error:", error);
+
+                showMessage(
+                    loginStatus,
+                    "Unable to connect to the server. Try again.",
+                    "error"
+                );
+
+            } finally {
+
+                loginButton.disabled = false;
+                loginButton.textContent = "Login";
+            }
+
+        });
+
+
+        // =====================================================
+        // RESET TYPING VERIFICATION
+        // =====================================================
+
+        function resetTyping() {
+
+            verificationActive = false;
+
+            currentIndex = 0;
+
+            keystrokes = [];
+
+            keyPressTimes.clear();
+
+            previousReleaseTime = null;
+
+            typingInput.value = "";
+
+            typingInput.disabled = true;
+
+            startTypingButton.disabled = false;
+
+            startTypingButton.textContent = "Start Typing";
+
+            verificationScore.textContent = "";
+
+        }
+
+
+        // =====================================================
+        // START TYPING
+        // =====================================================
+
+        startTypingButton.addEventListener("click", function () {
+
+            resetTyping();
+
+            verificationActive = true;
+
+            typingInput.disabled = false;
+
+            typingInput.focus();
+
+            startTypingButton.disabled = true;
+
+            startTypingButton.textContent = "Typing...";
+
+            showMessage(
+                typingStatus,
+                "Type the phrase naturally."
+            );
+
+        });
+
+
+        // =====================================================
+        // RESET BUTTON
+        // =====================================================
+
+        resetTypingButton.addEventListener("click", function () {
+
+            if (verificationInProgress) {
+
+                resetTyping();
+
+                showMessage(
+                    typingStatus,
+                    "Typing reset. Click Start Typing to try again."
+                );
+
+            }
+
+        });
+
+
+        // =====================================================
+        // KEYDOWN EVENT
+        // =====================================================
+
+        typingInput.addEventListener("keydown", function (event) {
+
+            if (!verificationActive) {
+                event.preventDefault();
+                return;
+            }
+
+            // Ignore modifier and navigation keys.
+            if (
+                event.key === "Shift" ||
+                event.key === "Control" ||
+                event.key === "Alt" ||
+                event.key === "Meta" ||
+                event.key === "CapsLock" ||
+                event.key === "Tab" ||
+                event.key === "Enter" ||
+                event.key === "Escape"
+            ) {
+                event.preventDefault();
+                return;
+            }
+
+            // No repeated key events.
+            if (event.repeat) {
+                event.preventDefault();
+                return;
+            }
+
+            // Only accept normal characters.
+            if (event.key.length !== 1) {
+                event.preventDefault();
+                return;
+            }
+
+            const expectedCharacter = PHRASE[currentIndex];
+
+            if (event.key !== expectedCharacter) {
+
+                event.preventDefault();
+
+                verificationActive = false;
+
+                typingInput.disabled = true;
+
+                startTypingButton.disabled = false;
+                startTypingButton.textContent = "Try Again";
+
+                showMessage(
+                    typingStatus,
+                    `Incorrect key. Expected "${expectedCharacter}". Please try again.`,
+                    "error"
+                );
+
+                return;
+            }
+
+            const currentTime = performance.now();
+
+            keyPressTimes.set(event.code, currentTime);
+
+            // Prevent the browser from inserting characters itself.
+            event.preventDefault();
+
+        });
+
+
+        // =====================================================
+        // KEYUP EVENT
+        // =====================================================
+
+        typingInput.addEventListener("keyup", async function (event) {
+
+            if (!verificationActive) {
+                return;
+            }
+
+            if (event.key.length !== 1) {
+                return;
+            }
+
+            const pressTime = keyPressTimes.get(event.code);
+
+            if (pressTime === undefined) {
+                return;
+            }
+
+            const releaseTime = performance.now();
+
+            const dwellTime = releaseTime - pressTime;
+
+            let flightTime = null;
+
+            if (previousReleaseTime !== null) {
+
+                flightTime = pressTime - previousReleaseTime;
+
+            }
+
+            const expectedCharacter = PHRASE[currentIndex];
+
+            keystrokes.push({
+                index: currentIndex + 1,
+                key: expectedCharacter,
+                dwellTime: Number(dwellTime.toFixed(2)),
+                flightTime: flightTime === null
+                    ? null
+                    : Number(flightTime.toFixed(2))
+            });
+
+            keyPressTimes.delete(event.code);
+
+            previousReleaseTime = releaseTime;
+
+            currentIndex++;
+
+            // Manually display the correctly typed character.
+            typingInput.value = PHRASE.substring(0, currentIndex);
+
+            // Phrase completed.
+            if (currentIndex === PHRASE.length) {
+
+                verificationActive = false;
+
+                typingInput.disabled = true;
+
+                startTypingButton.disabled = true;
+
+                typingStatus.textContent =
+                    "Checking your typing pattern...";
+
+                await submitTypingVerification();
+
+            }
+
+        });
+
+
+        // =====================================================
+        // SEND TYPING DATA TO BACKEND
+        // =====================================================
+
+        async function submitTypingVerification() {
+
+            try {
+
+                const response = await fetch("/api/verify-typing", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        phrase: PHRASE,
+                        keystrokes: keystrokes
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success && result.verified) {
+
+                    showMessage(
+                        typingStatus,
+                        "Typing verification successful. Redirecting...",
+                        "success"
+                    );
+
+                    verificationScore.textContent =
+                        `Distance score: ${result.distance}`;
+
+                    window.location.href = result.next_url;
+
+                    return;
+                }
+
+                showMessage(
+                    typingStatus,
+                    result.message || "Typing verification failed. Try again.",
+                    "error"
+                );
+
+                if (result.distance !== undefined) {
+
+                    verificationScore.textContent =
+                        `Distance score: ${result.distance}`;
+
+                }
+
+                startTypingButton.disabled = false;
+                startTypingButton.textContent = "Try Again";
+
+            } catch (error) {
+
+                console.error("Verification error:", error);
+
+                showMessage(
+                    typingStatus,
+                    "Unable to verify typing. Please try again.",
+                    "error"
+                );
+
+                startTypingButton.disabled = false;
+                startTypingButton.textContent = "Try Again";
+
+            }
+
+        }
+
+    </script>
+
+</body>
+</html>

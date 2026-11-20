@@ -1,0 +1,253 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register | Rhythmlock</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+
+        <a href="{{ url_for('home') }}">Rhythmlock</a>
+
+        <div>
+            <a href="{{ url_for('login_page') }}">Login</a>
+            <a href="{{ url_for('home') }}">Home</a>
+        </div>
+
+    </nav>
+
+
+    <!-- Registration Section -->
+    <main>
+
+        <h1>Create Your Account</h1>
+
+        <p>
+            Register to start your behavioral authentication journey.
+        </p>
+
+
+        <!-- Registration Form -->
+        <form id="registerForm">
+
+            <!-- Username -->
+            <div>
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter username"
+                    autocomplete="username"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Email -->
+            <div>
+
+                <label for="email">
+                    Email
+                </label>
+
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter email"
+                    autocomplete="email"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Password -->
+            <div>
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Minimum 8 characters"
+                    minlength="8"
+                    autocomplete="new-password"
+                    required
+                >
+
+            </div>
+
+
+            <!-- Submit Button -->
+            <button type="submit" id="registerButton">
+                Create Account
+            </button>
+
+        </form>
+
+
+        <!-- Registration Status -->
+        <p id="registerStatus" aria-live="polite"></p>
+
+
+        <!-- Login Link -->
+        <p>
+            Already have an account?
+
+            <a href="{{ url_for('login_page') }}">
+                Login here
+            </a>
+        </p>
+
+    </main>
+
+
+    <!-- Registration JavaScript -->
+    <script>
+
+        // DOM Elements
+        const registerForm =
+            document.getElementById("registerForm");
+
+        const registerStatus =
+            document.getElementById("registerStatus");
+
+        const registerButton =
+            document.getElementById("registerButton");
+
+
+        // Registration Form Submission
+        registerForm.addEventListener(
+            "submit",
+            async function(event) {
+
+                event.preventDefault();
+
+                // Disable button during registration
+                registerButton.disabled = true;
+
+                registerButton.textContent = "Creating Account...";
+
+                registerStatus.textContent =
+                    "Creating your account...";
+
+
+                // Collect registration details
+                const userData = {
+
+                    username:
+                        document.getElementById("username").value.trim(),
+
+                    email:
+                        document.getElementById("email").value.trim(),
+
+                    password:
+                        document.getElementById("password").value
+
+                };
+
+
+                try {
+
+                    // Send registration request to Flask backend
+                    const response = await fetch("/register", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(userData)
+
+                    });
+
+
+                    // Read server response
+                    const result = await response.json();
+
+
+                    // Handle registration errors
+                    if (!response.ok) {
+
+                        throw new Error(
+                            result.message || "Registration failed."
+                        );
+
+                    }
+
+
+                    // Validate redirect URL
+                    if (
+                        typeof result.next_url !== "string" ||
+                        !result.next_url.startsWith("/") ||
+                        result.next_url.startsWith("//")
+                    ) {
+
+                        throw new Error(
+                            "Invalid redirect response from server."
+                        );
+
+                    }
+
+
+                    // Display success message
+                    registerStatus.textContent =
+                        (result.message || "Account created successfully.") +
+                        " Redirecting to enrollment...";
+
+
+                    registerButton.textContent =
+                        "Account Created";
+
+
+                    // Redirect to typing enrollment
+                    window.location.href = result.next_url;
+
+
+                }
+
+                catch(error) {
+
+                    console.error(
+                        "Registration error:",
+                        error
+                    );
+
+                    registerStatus.textContent =
+                        error.message || "Something went wrong.";
+
+                    registerButton.disabled = false;
+
+                    registerButton.textContent =
+                        "Create Account";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>

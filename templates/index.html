@@ -1,0 +1,203 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Rhythmlock is a keystroke dynamics-based behavioral authentication system that uses your unique typing rhythm."
+    >
+
+    <title>Rhythmlock | Behavioral Authentication</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+
+        .hero {
+            padding: 55px 0;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 18px;
+        }
+
+        .hero-description {
+            max-width: 650px;
+            font-size: 17px;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .hero-button {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 7px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: bold;
+            transition: 0.2s ease;
+        }
+
+        .primary-button {
+            background: #ffffff;
+            color: #080808;
+        }
+
+        .primary-button:hover {
+            background: #d4d4d4;
+            color: #080808;
+            transform: translateY(-2px);
+        }
+
+        .secondary-button {
+            background: #252525;
+            color: #ffffff;
+            border: 1px solid #444444;
+        }
+
+        .secondary-button:hover {
+            background: #353535;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .hero-info {
+            margin-top: 35px;
+            padding: 22px;
+            background: #141414;
+            border: 1px solid #303030;
+            border-radius: 10px;
+        }
+
+        .hero-info h2 {
+            font-size: 19px;
+        }
+
+        .hero-info p {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 480px) {
+
+            .hero {
+                padding: 30px 0;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .hero-description {
+                font-size: 15px;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-button {
+                text-align: center;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- Navigation -->
+    <nav>
+
+        <a href="{{ url_for('home') }}">
+            Rhythmlock
+        </a>
+
+        <div>
+
+            <a href="{{ url_for('login_page') }}">
+                Login
+            </a>
+
+            <a href="{{ url_for('register_page') }}">
+                Register
+            </a>
+
+        </div>
+
+    </nav>
+
+
+    <!-- Main Hero Section -->
+    <main>
+
+        <section class="hero">
+
+            <h1>
+                Welcome to Rhythmlock
+            </h1>
+
+            <p class="hero-description">
+                Keystroke Dynamics-Based Behavioral Authentication System.
+                Secure your account using your unique typing rhythm.
+            </p>
+
+
+            <!-- Main Actions -->
+            <div class="hero-actions">
+
+                <a
+                    href="{{ url_for('register_page') }}"
+                    class="hero-button primary-button"
+                >
+                    Get Started
+                </a>
+
+                <a
+                    href="{{ url_for('login_page') }}"
+                    class="hero-button secondary-button"
+                >
+                    Login
+                </a>
+
+            </div>
+
+
+            <!-- Information -->
+            <div class="hero-info">
+
+                <h2>
+                    What is Rhythmlock?
+                </h2>
+
+                <p>
+                    Rhythmlock explores behavioral authentication
+                    through keystroke dynamics. It analyzes typing
+                    characteristics such as dwell time and flight time
+                    to build an individual typing profile.
+                </p>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | Rhythmlock</title>
+
+    <meta
+        name="description"
+        content="Rhythmlock behavioral authentication dashboard."
+    >
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        .status-active {
+            color: #55d98b;
+        }
+
+        .status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            margin-right: 7px;
+            background: #55d98b;
+            border-radius: 50%;
+        }
+
+        .dashboard-info {
+            line-height: 1.7;
+        }
+
+        .dashboard-status {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #183323;
+            color: #55d98b;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        #logoutStatus {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav>
+
+        <a href="{{ url_for('dashboard') }}">
+            Rhythmlock
+        </a>
+
+        <button type="button" id="logoutButton">
+            Logout
+        </button>
+
+    </nav>
+
+
+    <!-- Dashboard Content -->
+    <main>
+
+        <h1>Welcome, {{ username }}!</h1>
+
+        <p>
+            Your Rhythmlock account is ready.
+        </p>
+
+
+        <!-- Profile Status -->
+        <section>
+
+            <h2>Your Typing Profile</h2>
+
+            <p>
+                Profile Status:
+                <strong class="status-active">
+                    Created
+                </strong>
+            </p>
+
+            <p>
+                Total Typing Samples:
+                <strong>{{ sample_count }}/7</strong>
+            </p>
+
+            <p class="dashboard-info">
+                Your personal typing baseline has been
+                successfully created and saved.
+            </p>
+
+        </section>
+
+
+        <!-- Behavioral Authentication Section -->
+        <section>
+
+            <h2>Behavioral Authentication</h2>
+
+            <p class="dashboard-info">
+                Rhythmlock uses your unique typing rhythm
+                to verify your identity during login.
+            </p>
+
+            <p>
+                Authentication Status:
+                <span class="dashboard-status">
+                    <span class="status-dot"></span>
+                    Active
+                </span>
+            </p>
+
+            <p>
+                Your account is protected using two
+                verification steps:
+            </p>
+
+            <ul>
+                <li>
+                    <strong>Password Authentication</strong>
+                    – Verifies your account credentials.
+                </li>
+
+                <li>
+                    <strong>Behavioral Authentication</strong>
+                    – Compares your typing rhythm with
+                    your saved typing profile.
+                </li>
+            </ul>
+
+            <p class="dashboard-info">
+                Your typing pattern is checked after
+                successful password verification.
+            </p>
+
+        </section>
+
+
+        <!-- Logout Status -->
+        <p id="logoutStatus" aria-live="polite"></p>
+
+    </main>
+
+
+    <!-- Logout Script -->
+    <script>
+
+        // DOM Elements
+        const logoutButton =
+            document.getElementById("logoutButton");
+
+        const logoutStatus =
+            document.getElementById("logoutStatus");
+
+
+        // Logout Request
+        logoutButton.addEventListener(
+            "click",
+            async function() {
+
+                // Prevent multiple logout requests
+                logoutButton.disabled = true;
+
+                logoutButton.textContent = "Logging out...";
+
+                logoutStatus.textContent =
+                    "Logging out of your account...";
+
+
+                try {
+
+                    // Send logout request to Flask backend
+                    const response = await fetch("/logout", {
+
+                        method: "POST"
+
+                    });
+
+
+                    // Read server response
+                    const result = await response.json();
+
+
+                    // Check logout status
+                    if (response.ok && result.success) {
+
+                        logoutStatus.textContent =
+                            "Logout successful. Redirecting...";
+
+                        window.location.href = "/";
+
+                        return;
+                    }
+
+
+                    // Handle unsuccessful logout
+                    throw new Error(
+                        result.message ||
+                        "Unable to logout. Please try again."
+                    );
+
+
+                }
+
+                catch(error) {
+
+                    console.error(
+                        "Logout error:",
+                        error
+                    );
+
+                    logoutStatus.textContent =
+                        error.message || "Something went wrong.";
+
+                    logoutButton.disabled = false;
+
+                    logoutButton.textContent = "Logout";
+
+                }
+
+            }
+        );
+
+    </script>
+
+</body>
+</html>
